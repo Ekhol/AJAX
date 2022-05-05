@@ -8,9 +8,20 @@
 
 <body>
 
-<script src="https://code.jquery.com/jquery-3.2.1.js"></script>
-<script src="https://unpkg.com/axios/dist/axios.js"></script>
-<script src="app.js"></script>
+  <div id="formDiv">
+    <form id="gifForm">
+      <input type="text" class="searchval" id="searchBar" placeholder="Insert text here">
+      <input type="submit" class="btn btn-submit" id="searchButton" value="Search Giphy!">
+      <button class="btn btn-remove" id="resetButton">Remove Gifs?</button>
+    </form>
+
+    <div id="gifs" class="imgRow">
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.js"></script>
+  <script src="app.js"></script>
 </body>
 
 </html>
