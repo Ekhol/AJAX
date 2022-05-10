@@ -4,7 +4,7 @@
   margin: 20px 5px;
 }
 
-.stories-list > li {
+.stories-list>li {
   color: gray;
   font-size: 0.8rem;
   margin: 10px 0;
@@ -18,6 +18,18 @@
 
 
 /* Individual stories */
+
+.star {
+  font-size: .75rem;
+  margin: 0 2px;
+  cursor: pointer;
+}
+
+.trash-can {
+  font-size: .75rem;
+  margin: 0 2px;
+  cursor: pointer;
+}
 
 .story-link {
   color: black;

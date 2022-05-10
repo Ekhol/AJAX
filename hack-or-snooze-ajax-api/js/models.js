@@ -24,8 +24,9 @@ class Story {
   /** Parses hostname out of URL and returns it. */
 
   getHostName() {
-    // UNIMPLEMENTED: complete this function!
-    return "hostname.com";
+    let domain = (new URL(this.url));
+    domain = domain.hostname;
+    return domain.replace("www.", "");
   }
 }
 
@@ -51,7 +52,9 @@ class StoryList {
     // Note presence of `static` keyword: this indicates that getStories is
     //  **not** an instance method. Rather, it is a method that is called on the
     //  class directly. Why doesn't it make sense for getStories to be an
-    //  instance method?
+    //  instance method? 
+
+    //  --It allows any child instantiations to be unaffected by the function called to the parent instance - it builds a static instance of the class.
 
     // query the /stories endpoint (no auth required)
     const response = await axios({
@@ -73,8 +76,31 @@ class StoryList {
    * Returns the new Story instance
    */
 
-  async addStory( /* user, newStory */) {
-    // UNIMPLEMENTED: complete this function!
+  async addStory(user, { title, author, url }) {
+    const token = user.loginToken;
+    const response = await axios({
+      method: "POST",
+      url: `${BASE_URL}/stories`,
+      data: { token, story: { title, author, url } },
+    });
+
+    const story = new Story(response.data.story);
+    this.stories.unshift(story);
+    user.ownStories.unshift(story);
+
+    return story;
+  }
+
+  async removeStory(user, storyId) {
+    await axios({
+      url: `${BASE_URL}/stories/${storyId}`,
+      method: "DELETE",
+      data: { token: user.loginToken }
+    });
+
+    this.stories = this.stories.filter(story => story.storyId !== storyId);
+    user.ownStories = user.ownStories.filter(story => story.storyId !== storyId);
+    user.favorites = user.favorites.filter(story => story.storyId !== storyId);
   }
 }
 
@@ -90,13 +116,13 @@ class User {
    */
 
   constructor({
-                username,
-                name,
-                createdAt,
-                favorites = [],
-                ownStories = []
-              },
-              token) {
+    username,
+    name,
+    createdAt,
+    favorites = [],
+    ownStories = []
+  },
+    token) {
     this.username = username;
     this.name = name;
     this.createdAt = createdAt;
@@ -192,5 +218,29 @@ class User {
       console.error("loginViaStoredCredentials failed", err);
       return null;
     }
+  }
+
+  async addNewFavorite(story) {
+    this.favorites.push(story);
+    await this.handleFavorites("add", story);
+  }
+
+  async removeFavorite(story) {
+    this.favorites = this.favorites.filter(sto => sto.storyId !== story.storyId);
+    await this.handleFavorites("remove", story);
+  }
+
+  async handleFavorites(status, story) {
+    const method = status === "add" ? "POST" : "DELETE";
+    const token = this.loginToken;
+    await axios({
+      url: `${BASE_URL}/users/${this.username}/favorites/${story.storyId}`,
+      method: method,
+      data: { token },
+    });
+  }
+
+  isFavorited(story) {
+    return this.favorites.some(sto => (sto.storyId === story.storyId));
   }
 }
